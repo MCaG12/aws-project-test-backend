@@ -1,15 +1,28 @@
 import express from "express";
+import cors from "cors";
 import type { i_canvasPixel } from "./interfaces/i_pixelCanvas";
 import CanvasManagement from "./services/canvasManagement";
 import SSE from "./SSE";
+import { createClient, RedisClientType  } from "redis";
+
+const client = createClient();
+
+async function main()
+{
+    await client.connect();
+}
+
+main();
 
 const pixelArray : i_canvasPixel[] = ([]);
-const canvasManagement = new CanvasManagement(pixelArray);
+
+const canvasManagement = new CanvasManagement(pixelArray, client);
 canvasManagement.initializeCanvasArray();
 
 const SSEController = new SSE(canvasManagement);
 
 const app = express();
+app.use(cors())
 
 app.use(express.json());
 
@@ -20,4 +33,6 @@ app.get('/initalize-canvas',SSEController.SyncCanvas) // fetches the latest canv
 app.post('/update-pixel', SSEController.PaintPixel)
 
 app.listen(3000, () => console.log("Server running on port 3000"));
+
+
 
