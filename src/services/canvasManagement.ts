@@ -1,5 +1,7 @@
+import { Repository } from "typeorm";
 import { i_canvasPixel } from "../interfaces/i_pixelCanvas";
 import {  RedisClientType  } from "redis";
+import { canvasSnapShot } from "../entities/canvasSnapShot";
 
 const rowSize = 64; // to quickly get the page up we will assume the grid will be a 32/32 square leading to 1024 pixels
 
@@ -8,12 +10,14 @@ export default class CanvasManagement
 {
     private pixelArray: i_canvasPixel[];
     private redisClient: RedisClientType;
+    private snapshotRepository : Repository<canvasSnapShot>;
 
 
-    constructor( pixelArray: i_canvasPixel[], redisClient: RedisClientType)
+    constructor( p_pixelArray: i_canvasPixel[], p_redisClient: RedisClientType, p_snapshotRepository : Repository<canvasSnapShot>)
     {
-        this.pixelArray = pixelArray;
-        this.redisClient = redisClient;
+        this.pixelArray = p_pixelArray;
+        this.redisClient = p_redisClient;
+        this.snapshotRepository = p_snapshotRepository;
     }
 
     public FetchCurrentCanvas(): i_canvasPixel[] 
@@ -29,18 +33,53 @@ export default class CanvasManagement
         {
             const initialPixels: Record<string, string> = {};
             console.log("redis hKey: 'pixelCanvas': not located initializing it...");
-            for(let y = 0; y < rowSize; y++)
+            const dbSnapShotLocated = await this.snapshotRepository.findOne( { where:{} } );
+            if(!dbSnapShotLocated)
             {
-                for(let x = 0; x < rowSize; x++)
+                //baby's first time running the process. Create a new canvas now!
+                for(let y = 0; y < rowSize; y++)
                 {
-                    let currentPixel: i_canvasPixel = {
-                        i_xPos: x,
-                        i_yPos: y,
-                        s_pixelColor: '#ffffff',
-                    }
-                    this.pixelArray[(y * rowSize) + x] = currentPixel;
-                    initialPixels[`${x},${y}`] = currentPixel.s_pixelColor;
-                }    
+                    for(let x = 0; x < rowSize; x++)
+                    {
+                        let currentPixel: i_canvasPixel = {
+                            i_xPos: x,
+                            i_yPos: y,
+                            s_pixelColor: '#ffffff',
+                        }
+                        this.pixelArray[(y * rowSize) + x] = currentPixel;
+                        initialPixels[`${x},${y}`] = currentPixel.s_pixelColor;
+                    }    
+                }
+            }
+            else
+            {
+                //Db had a snapshot saved. load it!
+                const foundPixelData = dbSnapShotLocated.pixelCanvasJson as Record<string, string>;
+                for(let y = 0; y < rowSize; y++)
+                {
+                    for(let x = 0; x < rowSize; x++)
+                    {
+                        let currentSnapShotPixelColor = foundPixelData[`${x},${y}`];
+
+                        if(currentSnapShotPixelColor == null)
+                        {
+                            console.log("UNDEFINED PIXEL COLOR FOUND IN THE SNAPSHOT!");
+                            console.log("COORDINATES X -> ", x, " Y -> ", y);
+                            console.log("UTILIZING BACKUP VALUE #FFFFFF");
+                            currentSnapShotPixelColor = "#FFFFFF";
+
+                        }
+
+                        let currentPixel: i_canvasPixel = {
+                            i_xPos: x,
+                            i_yPos: y,
+                            s_pixelColor: currentSnapShotPixelColor,
+                        }
+
+                        this.pixelArray[(y * rowSize) + x] = currentPixel;
+                        initialPixels[`${x},${y}`] = currentPixel.s_pixelColor;
+                    }    
+                }
             }
             await this.redisClient.hSet('pixelCanvas', initialPixels);
         }
