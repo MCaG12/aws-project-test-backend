@@ -99,11 +99,6 @@ export default class CanvasManagement
                         console.error("initializing pixel with backup value #FFFFFF")
                         redisPixelColor = '#FFFFFF';
                     }
-                    else
-                    {
-                        console.log("located pixel with coordinates ", x, y);
-                        console.log("color -> ", redisPixelColor);
-                    }
 
                     let currentPixel: i_canvasPixel = {
                         i_xPos: x,

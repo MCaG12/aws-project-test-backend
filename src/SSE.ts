@@ -3,6 +3,7 @@ import { Request , Response } from "express";
 import CanvasManagement from "./services/canvasManagement";
 import { i_canvasPixel } from "./interfaces/i_pixelCanvas";
 import i_user from "./interfaces/i_user";
+import { PaintPixelErrorMessage } from "./const/UserPaintPixel";
 
 const PaintPixelInterval = 5000; //5 seconds of wait per pixel!
 
@@ -12,9 +13,9 @@ export default class SSE
    private userIdSequence = 0;
    private canvasManagementController : CanvasManagement
 
-   constructor(CanvasManagementController : CanvasManagement) 
+   constructor(p_CanvasManagementController : CanvasManagement) 
    {
-        this.canvasManagementController = CanvasManagementController;
+        this.canvasManagementController = p_CanvasManagementController;
    }
 
    public InitializeSSEResponse = (p_Req: Request, p_Res: Response) =>
@@ -33,7 +34,7 @@ export default class SSE
         }
 
         this.users.push(newUser);
-        console.log("new user pushed -> " , newUser);
+        console.log("new user pushed -> " , newUser.userId);
 
         this.userIdSequence+=1;
 
@@ -63,33 +64,45 @@ export default class SSE
         const bodyPixelX = p_Req.body.X;
         const bodyPixelY = p_Req.body.Y;
         const bodyPixelColor = p_Req.body.Color;
-        const bodyUserCookie = p_Req.cookies["userId"];
+        const bodyUserCookie = p_Req.userCookie;
 
         if(typeof(bodyPixelX) != "number" || bodyPixelX == null)
         {
-            return p_Res.status(400).json({message: "placeholder"})
+            return p_Res.status(400).json({message: PaintPixelErrorMessage.INVALID_X_POSITION})
         }
 
         if(typeof(bodyPixelY) != "number" || bodyPixelY == null)
         {
-            return p_Res.status(400).json({message: "placeholder"})
+            return p_Res.status(400).json({message: PaintPixelErrorMessage.INVALID_Y_POSITION})
         }
 
         if(typeof(bodyPixelColor) != "string" || bodyPixelColor.trim() == "")
         {
-            return p_Res.status(400).json({message: "placeholder"})
+            return p_Res.status(400).json({message: PaintPixelErrorMessage.INVALID_COLOR_CHOSEN})
         }
 
         if(typeof(bodyUserCookie) != "string" || bodyUserCookie.trim() == "")
             {
-                return p_Res.status(400).json({message: "placeholder"})
+                return p_Res.status(400).json({message: PaintPixelErrorMessage.EMPTY_COOKIE})
             }
 
-        const userFound = this.users.find( (user) => user.userId == bodyUserCookie);
+
+        console.log("current Cookie -> ", bodyUserCookie); 
+        for(const user of this.users)
+            {
+                console.log(user.userId)
+            }                                 
+        
+        const userFound = this.users.find( (user) => {
+                                                      if(user.userId == bodyUserCookie) 
+                                                        {
+                                                            return user
+                                                        }
+                                                    });
 
         if(!userFound)
             {
-                return p_Res.status(400).json({message: "placeholder"})
+                return p_Res.status(400).json({message: PaintPixelErrorMessage.COOKIE_NOT_FOUND})
             }
 
         //user has been located find the last time they updated a pixel!
