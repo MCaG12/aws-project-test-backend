@@ -8,6 +8,8 @@ import canvasRouter from "./routes/canvasSnapShotRouter";
 import { AppDataSource } from "./data-source";
 import dbSnapShotManagement from "./services/dbSnapShotManagement";
 import { canvasSnapShot } from "./entities/canvasSnapShot";
+import HandleCookies from "./middlewares/cookie";
+import cookieParser from 'cookie-parser';
 
 //declaring variables for pixelArray and sseCleint
 const pixelArray : i_canvasPixel[] = ([]);
@@ -35,6 +37,9 @@ app.use(express.json());
 AppDataSource.initialize()
   .then(() => 
   {
+    app.use(cookieParser());
+    app.use(HandleCookies);
+
     //initializing services
     canvasManagementService = new CanvasManagement(pixelArray, client, AppDataSource.getRepository(canvasSnapShot));
 
@@ -45,6 +50,7 @@ AppDataSource.initialize()
     dbSnapShotManagementService  = new dbSnapShotManagement(client, AppDataSource.getRepository(canvasSnapShot));
 
     //mapping basic app endpoints
+
     app.use('/canvas-snapshots', canvasRouter);
 
     app.get('/events', SSEController.InitializeSSEResponse); //opens up the SSE Res
