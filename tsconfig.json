@@ -11,6 +11,6 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/middlewares/cookies.tsx"],
   "exclude": ["node_modules", "dist"]
 }
