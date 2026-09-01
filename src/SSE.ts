@@ -130,4 +130,11 @@ export default class SSE
             p_Res.status(400).json({message: `Pixels can only be changed on an interval of ${PaintPixelInterval/1000} seconds!`});
         }
     }
+
+    public saveCanvasPPMImage = async (p_Req: Request, p_Res: Response) =>
+    {
+        const currentCanvasPPMFile = this.canvasManagementController.GenerateCanvasPPM();
+        p_Res.status(200).sendFile(await currentCanvasPPMFile);
+
+    }
 }

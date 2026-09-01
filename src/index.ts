@@ -58,9 +58,11 @@ AppDataSource.initialize()
 
     app.get('/events', SSEController.InitializeSSEResponse); //opens up the SSE Res
 
-    app.get('/initalize-canvas',SSEController.SyncCanvas) // fetches the latest canvas snapshot syncronizing new users to what was there before they joined
+    app.get('/initalize-canvas',SSEController.SyncCanvas); // fetches the latest canvas snapshot syncronizing new users to what was there before they joined
 
-    app.post('/update-pixel', SSEController.PaintPixel)
+    app.post('/update-pixel', SSEController.PaintPixel);
+
+    app.get('/get-canvas-ppm', SSEController.saveCanvasPPMImage);
 
     //initializing canvas snapshot scheduler
     dbSnapShotManagementService.scheduleSnapShot(snapShotDelay);
