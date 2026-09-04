@@ -50,7 +50,7 @@ AppDataSource.initialize()
 
     SSEController = new SSE(canvasManagementService);
 
-    dbSnapShotManagementService  = new dbSnapShotManagement(client, AppDataSource.getRepository(canvasSnapShot));
+    dbSnapShotManagementService  = new dbSnapShotManagement(client, AppDataSource.getRepository(canvasSnapShot), SSEController);
 
     //mapping basic app endpoints
 
