@@ -16,6 +16,7 @@ const pixelArray : i_canvasPixel[] = ([]);
 const client = createClient();
 const snapShotDelay = 30000 //snapshots taken every 30s
 
+const corsUrls = ["http://localhost:5173"]
 //creating Services
 let canvasManagementService;
 let dbSnapShotManagementService;
@@ -31,7 +32,7 @@ async function main()
 main();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: corsUrls,
     credentials: true
 }));
 

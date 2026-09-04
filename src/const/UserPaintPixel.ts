@@ -1,7 +1,8 @@
 export const PaintPixelErrorMessage = {
-  INVALID_X_POSITION: 'The X position chosen is invalid... somehow',
-  INVALID_Y_POSITION: 'The Y position chosen is invalid... somehow',
-  INVALID_COLOR_CHOSEN: 'The color chosen is either empty or invalid!',
-  EMPTY_COOKIE: 'The request cookie is empty!',
-  COOKIE_NOT_FOUND: 'The requests cookie was not found!'
+  INVALID_X_POSITION: 'A posição X escolhida é inválida... de alguma forma',
+  INVALID_Y_POSITION: 'A posição Y escolhida é inválida... de alguma forma',
+  INVALID_COLOR_CHOSEN: 'A cor escolhida está vazia ou é inválida!',
+  EMPTY_COOKIE: 'O cookie da requisição está vazio!',
+  COOKIE_NOT_FOUND: 'O cookie da requisição não foi encontrado!',
+  PIXELS_DELAY: 'Pixels só podem ser alterados em intervalos de 5 segundos!'
 } as const;
