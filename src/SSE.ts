@@ -38,11 +38,26 @@ export default class SSE
         this.users.push(newUser);
         console.log("new user pushed -> " , newUser.userId);
 
+        const newUserBroadcast :i_SSEEvent<number> =
+        {
+            i_SSEBroadcastCode: SSEReqCodes.USER_COUNT_SSE_BROADCAST,
+            any_SSEBroadcastData: this.users.length
+        }
+
+        this.BroadCastPixelChange(newUserBroadcast);  
+
         this.userIdSequence+=1;
 
         p_Res.on('close', () => 
             {
-                this.users = this.users.filter((user) => { return user.userId != newUser.userId})
+                this.users = this.users.filter((user) => user.sseRes !== p_Res);
+                const userLeftBroadcast :i_SSEEvent<number> =
+                {
+                    i_SSEBroadcastCode: SSEReqCodes.USER_COUNT_SSE_BROADCAST,
+                    any_SSEBroadcastData: this.users.length
+                }
+
+                this.BroadCastPixelChange(userLeftBroadcast);  
             })
     }
 
