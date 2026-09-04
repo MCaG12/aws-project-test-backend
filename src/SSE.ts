@@ -152,7 +152,7 @@ export default class SSE
         }
         else
         {
-            p_Res.status(400).json({message: `Pixels can only be changed on an interval of ${PaintPixelInterval/1000} seconds!`});
+            p_Res.status(400).json({message: PaintPixelErrorMessage.PIXELS_DELAY});
         }
     }
 
