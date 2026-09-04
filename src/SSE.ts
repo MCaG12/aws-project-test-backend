@@ -4,6 +4,8 @@ import CanvasManagement from "./services/canvasManagement";
 import { i_canvasPixel } from "./interfaces/i_pixelCanvas";
 import i_user from "./interfaces/i_user";
 import { PaintPixelErrorMessage } from "./const/UserPaintPixel";
+import i_SSEEvent from "./interfaces/i_SSEBroadcastBody";
+import { SSEReqCodes } from "./const/SSEReqCodes";
 
 const PaintPixelInterval = 5000; //5 seconds of wait per pixel!
 
@@ -44,9 +46,9 @@ export default class SSE
             })
     }
 
-    public BroadCastPixelChange = (p_pixelChanged : i_canvasPixel ) =>
+    public BroadCastPixelChange = (p_sseEvent : i_SSEEvent<any> ) =>
     {
-        const payload = `data: ${JSON.stringify(p_pixelChanged)}\n\n`;
+        const payload = `data: ${JSON.stringify(p_sseEvent)}\n\n`;
         for(const user of this.users)
         {
             user.sseRes.write(payload);
@@ -117,8 +119,16 @@ export default class SSE
                 s_pixelColor : bodyPixelColor
             }
 
+            const i_SSEPixelChangeBroadcast: i_SSEEvent<i_canvasPixel> = 
+            {
+                i_SSEBroadcastCode: SSEReqCodes.PAINT_PIXEL_SSE_BROADCAST,
+                any_SSEBroadcastData: updatePixel
+            };
+
             this.canvasManagementController.UpdateCanvasArray(updatePixel);
-            this.BroadCastPixelChange(updatePixel);  
+
+            this.BroadCastPixelChange(i_SSEPixelChangeBroadcast);  
+
             userFound.lastTimePosted = new Date();
 
             console.log(`User with code ${userFound.userId} last time posted has been updated to ${userFound.lastTimePosted}`);
